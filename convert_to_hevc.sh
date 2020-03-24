@@ -20,26 +20,28 @@ r() {
 }
 
 add_hevc() {
-	local replaced="$(echo "$1" | r "x.\?264" | r "h.\?264" | r xvid | r divx)"
+	local replaced
 	local extension="$2"
 	local base="${replaced%.*}"
+	replaced="$(echo "$1" | r "x.\?264" | r "h.\?264" | r xvid | r divx)"
 
 	echo "${base}" | grep -i HEVC >/dev/null
 	if [ $? -ne 0 ]; then
-		# nothing changed, so just tack on hevc at the end
+		# Nothing changed, so just tack on hevc at the end
 		base="${base}.HEVC"
 	fi
 	echo "${base}.${extension}"
 }
 
 convert_to_hevc() {
-	input="$1"
-	shift
+	local streams
+	local output
+	local input="$1"
 	streams="$(get_streams "${input}")"
 
 	if is_hevc "${streams}"; then
 		echo "\"${input}\" is already in HEVC format, bailing…"
-		exit
+		return
 	fi
 
 	output="$(add_hevc "${input}" mkv)"
@@ -55,9 +57,5 @@ convert_to_hevc() {
 		crf=22:qcomp=0.8:aq-mode=1:aq_strength=1.0:qg-size=16:psy-rd=0.7:psy-rdoq=5.0:rdoq-level=1:merange=44 \
 		-c:a copy \
 		-c:s copy \
-		"${output}" < /dev/null
+		"${output}"
 }
-
-for i in "$@"; do
-	convert_to_hevc "$i";
-done
