@@ -1,7 +1,6 @@
 #!/bin/bash
 # Transcodes input video file to use the h265/HEVC codec.
 # Outputs the same filename but with x264/h264/xvid/etc. replaced with HEVC.
-set -euo pipefail
 
 sed=sed
 if type gsed >/dev/null 2>&1; then
