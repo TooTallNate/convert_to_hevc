@@ -2,28 +2,29 @@
 # Transcodes input video file to use the h265/HEVC codec.
 # Outputs the same filename but with x264/h264/xvid/etc. replaced with HEVC.
 
-sed=sed
+# Allow for `sed` or `gsed`
+convert_to_hevc__sed=sed
 if type gsed >/dev/null 2>&1; then
-	sed=gsed
+	convert_to_hevc__sed=gsed
 fi
 
-get_streams() {
-	ffprobe "$1" 2>&1 | grep -e '^\s*Stream' | "$sed" -e 's/^[[:space:]]*//'
+convert_to_hevc__get_streams() {
+	ffprobe "$1" 2>&1 | grep -e '^\s*Stream' | "$convert_to_hevc__sed" -e 's/^[[:space:]]*//'
 }
 
-is_hevc() {
+convert_to_hevc__is_hevc() {
 	echo "$1" | grep 'Video: hevc' >/dev/null
 }
 
-r() {
-	"$sed" "s/$1/HEVC/ig"
+convert_to_hevc__r() {
+	"$convert_to_hevc__sed" "s/$1/HEVC/ig"
 }
 
-add_hevc() {
+convert_to_hevc__add_hevc() {
 	local replaced
 	local extension="$2"
 	local base="${replaced%.*}"
-	replaced="$(echo "$1" | r "x.\?264" | r "h.\?264" | r xvid | r divx)"
+	replaced="$(echo "$1" | convert_to_hevc__r "x.\?264" | convert_to_hevc__r "h.\?264" | convert_to_hevc__r xvid | convert_to_hevc__r divx)"
 
 	echo "${base}" | grep -i HEVC >/dev/null
 	if [ $? -ne 0 ]; then
@@ -37,14 +38,14 @@ convert_to_hevc() {
 	local streams
 	local output
 	local input="$1"
-	streams="$(get_streams "${input}")"
+	streams="$(convert_to_hevc__get_streams "${input}")"
 
-	if is_hevc "${streams}"; then
+	if convert_to_hevc__is_hevc "${streams}"; then
 		echo "\"${input}\" is already in HEVC format, bailing…"
 		return
 	fi
 
-	output="$(add_hevc "${input}" mkv)"
+	output="$(convert_to_hevc__add_hevc "${input}" mkv)"
 	echo "Converting \"${input}\" to \"${output}\""
 	ffmpeg \
 		-hide_banner \
