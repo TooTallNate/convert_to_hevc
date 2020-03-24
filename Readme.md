@@ -9,7 +9,7 @@ Outputs the same filename but with x264/h264/xvid/etc. replaced with HEVC.
  1. Add to your `.bashrc` file:
     ```bash
     . "$(which import)"
-    import "tootallnate/convert_to_hevc@0.0.1"`
+    import "tootallnate/convert_to_hevc@0.0.1"
     ```
 
 ## Usage
